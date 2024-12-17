@@ -28,11 +28,6 @@ public class Main {
             String resource = request[1]; // quella da fare gli if
             String version = request[2];
 
-            
-            if (resource.equals("/")) {//se è vuoto faccio in modo che prende index.html
-                resource = "/index.html";
-            }
-
             String header;
             do {
                 header = in.readLine();
@@ -40,14 +35,25 @@ public class Main {
             } while (!header.isEmpty());
             System.out.println("richiesta terminata");
 
-            File file = new File("htdocs" + resource);            
-            if (file.exists()) {
-                
+            if (resource.endsWith("/")) {// se è vuoto faccio in modo che prende index.html
+                resource = resource + "/index.html";
+            }
+
+            File file = new File("htdocs" + resource);
+            if (file.isDirectory()) { //se una cartella si chiama in quel modo prende l' index.html di quella
+            
+                out.writeBytes("HTTP/1.1 301 Moved Permanently\n");
+                out.writeBytes("Content-Lengh: 0\n");
+                out.writeBytes("Location: " + resource + "/\n");
+                out.writeBytes("\n");
+
+            } else if (file.exists()) {
+
                 out.writeBytes("HTTP/1.1 200 OK\n");
                 out.writeBytes("Content-Type: " + getContentType(file) + "\n");
                 out.writeBytes("Content-Length: " + file.length() + " \n");
                 out.writeBytes("\n");
-                
+
                 InputStream input = new FileInputStream(file);
                 byte[] buf = new byte[8192];
                 int n;
@@ -56,11 +62,9 @@ public class Main {
                 }
                 input.close();
 
-
-
             } else {
 
-                //String responseBody = "pagina non trovata o non disponibile";
+                // String responseBody = "pagina non trovata o non disponibile";
                 out.writeBytes("HTTP/1.1 404 Not found\n");
                 out.writeBytes("Content-Lenght: 0 \n");
                 out.writeBytes("\n");
@@ -72,14 +76,14 @@ public class Main {
 
     }
 
-    private static String getContentType(File f){
+    private static String getContentType(File f) {
         String[] s = f.getName().split("//.");
         String ext = s[s.length - 1];
         switch (ext) {
             case "html":
             case "htm":
                 return "text/html";
-            
+
             case "png":
                 return "image/png";
 
