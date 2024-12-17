@@ -28,6 +28,11 @@ public class Main {
             String resource = request[1]; // quella da fare gli if
             String version = request[2];
 
+            
+            if (resource.equals("/")) {//se è vuoto faccio in modo che prende index.html
+                resource = "/index.html";
+            }
+
             String header;
             do {
                 header = in.readLine();
@@ -42,9 +47,10 @@ public class Main {
                 out.writeBytes("Content-Type: " + getContentType(file) + "\n");
                 out.writeBytes("Content-Length: " + file.length() + " \n");
                 out.writeBytes("\n");
+                
+                InputStream input = new FileInputStream(file);
                 byte[] buf = new byte[8192];
                 int n;
-                InputStream input = new FileInputStream(file);
                 while ((n = input.read(buf)) != -1) {
                     out.write(buf, 0, n);
                 }
